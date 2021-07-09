@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  'AWS::CloudFormation::Designer':
+    91d187a3-61ff-430c-a09f-e5c747eb8f99:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 186
+        'y': 100
+      z: 0
+      embeds: []
+Resources:
+  TrifactaBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 91d187a3-61ff-430c-a09f-e5c747eb8f99
+Outputs:
+  TrifactaBucket:
+    Value: !Sub '${TrifactaBucket}'
+  StackName:
+    Value: !Sub '${AWS::StackName}'
