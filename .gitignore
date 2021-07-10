@@ -2,3 +2,5 @@
 .chalice/venv/
 __pycache__/
 out/
+trifacta-packaged.yaml
+.chalice/deployed/dev.json
