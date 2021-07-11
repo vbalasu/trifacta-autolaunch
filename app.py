@@ -1,7 +1,22 @@
 from chalice import Chalice
-
 app = Chalice(app_name='trifacta-autolaunch')
 
+# BEGIN Cloudformation Custom Resource (crhelper)
+from crhelper import CfnResource
+helper = CfnResource()
+@helper.create
+@helper.update
+def sum_2_numbers(event, _):
+    s = int(event['ResourceProperties']['No1']) + int(event['ResourceProperties']['No2'])
+    helper.Data['Sum'] = s
+@helper.delete
+def no_op(_, __):
+    pass
+@app.lambda_function(name='AddNumbers')
+def add_numbers(event, context):
+    helper(event, context)
+    return helper.Data
+# END Cloudformation Custom Resource (crhelper)
 
 @app.route('/')
 def index():

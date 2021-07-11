@@ -17,8 +17,19 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: 91d187a3-61ff-430c-a09f-e5c747eb8f99
+  SumResource:
+    Type: 'Custom::Summer'
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - AddNumbers
+          - Arn
+      No1: 2
+      No2: 3
 Outputs:
   TrifactaBucket:
     Value: !Sub '${TrifactaBucket}'
   StackName:
     Value: !Sub '${AWS::StackName}'
+  Sum:
+    Value: !GetAtt SumResource.Sum
