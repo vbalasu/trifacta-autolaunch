@@ -18,7 +18,9 @@ def trifacta_autolaunch(event, context):
     cf = boto3.client('cloudformation')
     describe_stacks = cf.describe_stacks(StackName=event['StackId'])
     describe_stack_resources = cf.describe_stack_resources(StackName=event['StackId'])
-    print({'event': event, 'describe_stacks': describe_stacks, 'describe_stack_resources': describe_stack_resources})
+    print('event', event)
+    print('describe_stacks', describe_stacks)
+    print('describe_stack_resources', describe_stack_resources)
     helper(event, context)
     return helper.Data
 # END Cloudformation Custom Resource (crhelper)
