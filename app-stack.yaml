@@ -20,18 +20,20 @@ Resources:
   TrifactaAutolaunch:
     Type: 'Custom::TrifactaAutolaunch'
     Properties:
-      ServiceToken:
-        Fn::GetAtt:
-          - TrifactaAutolaunch
-          - Arn
-      Param1: SomeString
-      Param2: 123
+      ServiceToken: !GetAtt 'TrifactaAutolaunchLambda.Arn'
+      No1: 2
+      No2: 3
 Outputs:
   TrifactaBucket:
     Value: !Sub '${TrifactaBucket}'
   StackName:
     Value: !Sub '${AWS::StackName}'
+<<<<<<< HEAD
   Event:
     Value: !GetAtt TrifactaAutolaunch.event
   Context:
     Value: !GetAtt TrifactaAutolaunch.context
+=======
+  Sum:
+    Value: !GetAtt TrifactaAutolaunch.No1
+>>>>>>> tmp

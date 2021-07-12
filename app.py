@@ -7,16 +7,17 @@ import json
 helper = CfnResource()
 @helper.create
 @helper.update
-def do_trifacta_autolaunch(event, context):
-    print('event', event)
-    print('context', context)
-    helper.Data['event'] = json.dumps(event)
-    helper.Data['context'] = json.dumps(context)
+def do_autolaunch(event, context):
+    helper.Data['No1'] = event['ResourceProperties']['No1']
 @helper.delete
 def no_op(_, __):
     pass
-@app.lambda_function(name='TrifactaAutolaunch')
+@app.lambda_function(name='TrifactaAutolaunchLambda')
 def trifacta_autolaunch(event, context):
+    import boto3
+    cf = boto3.client('cloudformation')
+    describe_stacks = cf.describe_stacks(StackName=event['StackId'])
+    print({'event': event, 'describe_stacks': describe_stacks})
     helper(event, context)
     return helper.Data
 # END Cloudformation Custom Resource (crhelper)
