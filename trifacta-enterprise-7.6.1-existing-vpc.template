@@ -1,0 +1,932 @@
+AWSTemplateFormatVersion: 2010-09-09
+Conditions:
+  IsGovCloud: !Or [!Equals [!Ref 'AWS::Region', us-gov-west-1], !Equals [!Ref 'AWS::Region',
+      us-gov-east-1]]
+Description: This launches Wrangler Enterprise (BYOL) in an existing VPC along with
+  a 4 node autoscaling EMR cluster.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: EC2 Configuration
+      Parameters:
+      - TrifactaInstanceType
+      - KeyName
+      - VPCId
+      - TrifactaSubnet
+      - EMRSubnet
+    - Label:
+        default: Network Configuration
+      Parameters:
+      - AllowedHTTPSource
+      - AllowedSSHSource
+    - Label:
+        default: EMR Cluster Node Configuration
+      Parameters:
+      - MasterNodeType
+      - MasterNodeVolSize
+      - CoreNodeType
+      - CoreNodeVolSize
+      - TaskNodeType
+    - Label:
+        default: EMR Cluster Autoscaling Configuration
+      Parameters:
+      - MinimumCoreNodes
+      - MaximumCoreNodes
+      - MinimumTaskNodes
+      - MaximumTaskNodes
+    ParameterLabels:
+      TrifactaInstanceType:
+        default: Trifacta server
+      KeyName:
+        default: Key pair
+      AllowedSSHSource:
+        default: SSH Source
+      AllowedHTTPSource:
+        default: HTTP Source
+      MinimumTaskNodes:
+        default: Min Task nodes
+      MaximumTaskNodes:
+        default: Max Task nodes
+      TaskNodeType:
+        default: Task node
+      MasterNodeType:
+        default: Master node
+      MasterNodeVolSize:
+        default: Master node storage
+      CoreNodeType:
+        default: Core node
+      CoreNodeVolSize:
+        default: Core node storage
+      MinimumCoreNodes:
+        default: Min Core nodes
+      MaximumCoreNodes:
+        default: Max Core nodes
+      VPCId:
+        default: VPC
+      TrifactaSubnet:
+        default: Trifacta subnet
+      EMRSubnet:
+        default: EMR subnet
+Parameters:
+  VPCId:
+    Description: VPC to launch Trifacta and the EMR cluster into.
+    Type: AWS::EC2::VPC::Id
+  TrifactaSubnet:
+    Description: Subnet to launch Trifacta into.
+    Type: AWS::EC2::Subnet::Id
+  EMRSubnet:
+    Description: Subnet to launch the EMR cluster into.
+    Type: AWS::EC2::Subnet::Id
+  TrifactaInstanceType:
+    Description: Instance type for the Trifacta Wrangler Enterprise EC2 instance.
+    Type: String
+    Default: c5.4xlarge
+    AllowedValues:
+    - t2.xlarge
+    - t2.2xlarge
+    - t3.2xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m4.10xlarge
+    - m4.16xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - m5.8xlarge
+    - m5.12xlarge
+    - m5.16xlarge
+    - m5.24xlarge
+    - m5n.xlarge
+    - m5n.2xlarge
+    - m5n.4xlarge
+    - m5n.8xlarge
+    - m5n.12xlarge
+    - m5n.16xlarge
+    - m5n.24xlarge
+    - m5a.large
+    - m5a.xlarge
+    - m5a.2xlarge
+    - m5a.4xlarge
+    - m5a.8xlarge
+    - m5a.12xlarge
+    - m5a.16xlarge
+    - m5a.24xlarge
+    - m5d.metal
+    - m5d.large
+    - m5d.xlarge
+    - m5d.2xlarge
+    - m5d.4xlarge
+    - m5d.8xlarge
+    - m5d.12xlarge
+    - m5d.16xlarge
+    - m5d.24xlarge
+    - m5dn.large
+    - m5dn.xlarge
+    - m5dn.2xlarge
+    - m5dn.4xlarge
+    - m5dn.8xlarge
+    - m5dn.12xlarge
+    - m5dn.16xlarge
+    - m5dn.24xlarge
+    - m5ad.large
+    - m5ad.xlarge
+    - m5ad.2xlarge
+    - m5ad.4xlarge
+    - m5ad.12xlarge
+    - m5ad.24xlarge
+    - c3.2xlarge
+    - c3.4xlarge
+    - c3.8xlarge
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c4.8xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - c5.9xlarge
+    - c5.12xlarge
+    - c5.18xlarge
+    - c5.24xlarge
+    - c5.metal
+    - c5d.large
+    - c5d.xlarge
+    - c5d.2xlarge
+    - c5d.4xlarge
+    - c5d.9xlarge
+    - c5d.18xlarge
+    - c5n.large
+    - c5n.xlarge
+    - c5n.2xlarge
+    - c5n.4xlarge
+    - c5n.9xlarge
+    - c5n.18xlarge
+    - f1.2xlarge
+    - f1.4xlarge
+    - f1.16xlarge
+    - g2.2xlarge
+    - g2.8xlarge
+    - g3.4xlarge
+    - g3.8xlarge
+    - g3.16xlarge
+    - g3s.xlarge
+    - g4dn.xlarge
+    - g4dn.2xlarge
+    - g4dn.4xlarge
+    - g4dn.8xlarge
+    - g4dn.12xlarge
+    - g4dn.16xlarge
+    - p2.xlarge
+    - p2.8xlarge
+    - p2.16xlarge
+    - p3.2xlarge
+    - p3.8xlarge
+    - p3.16xlarge
+    - p3dn.24xlarge
+    - cr1.8xlarge
+    - r3.large
+    - r3.xlarge
+    - r3.2xlarge
+    - r3.4xlarge
+    - r3.8xlarge
+    - r4.large
+    - r4.xlarge
+    - r4.2xlarge
+    - r4.4xlarge
+    - r4.8xlarge
+    - r4.16xlarge
+    - r5.metal
+    - r5.large
+    - r5.xlarge
+    - r5.2xlarge
+    - r5.4xlarge
+    - r5.8xlarge
+    - r5.12xlarge
+    - r5.16xlarge
+    - r5.24xlarge
+    - r5n.large
+    - r5n.xlarge
+    - r5n.2xlarge
+    - r5n.4xlarge
+    - r5n.8xlarge
+    - r5n.12xlarge
+    - r5n.16xlarge
+    - r5n.24xlarge
+    - r5a.large
+    - r5a.xlarge
+    - r5a.2xlarge
+    - r5a.4xlarge
+    - r5a.8xlarge
+    - r5a.12xlarge
+    - r5a.16xlarge
+    - r5a.24xlarge
+    - r5d.metal
+    - r5d.large
+    - r5d.xlarge
+    - r5d.2xlarge
+    - r5d.4xlarge
+    - r5d.8xlarge
+    - r5d.12xlarge
+    - r5d.16xlarge
+    - r5d.24xlarge
+    - r5dn.large
+    - r5dn.xlarge
+    - r5dn.2xlarge
+    - r5dn.4xlarge
+    - r5dn.8xlarge
+    - r5dn.12xlarge
+    - r5dn.16xlarge
+    - r5dn.24xlarge
+    - r5ad.large
+    - r5ad.xlarge
+    - r5ad.2xlarge
+    - r5ad.4xlarge
+    - r5ad.12xlarge
+    - r5ad.24xlarge
+    - x1.16xlarge
+    - x1.32xlarge
+    - x1e.xlarge
+    - x1e.2xlarge
+    - x1e.4xlarge
+    - x1e.8xlarge
+    - x1e.16xlarge
+    - x1e.32xlarge
+    - i2.xlarge
+    - i2.2xlarge
+    - i2.4xlarge
+    - i2.8xlarge
+    - i3.large
+    - i3.xlarge
+    - i3.2xlarge
+    - i3.4xlarge
+    - i3.8xlarge
+    - i3.16xlarge
+    - i3.metal
+    - h1.2xlarge
+    - h1.4xlarge
+    - h1.8xlarge
+    - h1.16xlarge
+    - hs1.8xlarge
+    - d2.xlarge
+    - d2.2xlarge
+    - d2.4xlarge
+    - d2.8xlarge
+    - z1d.metal
+    - z1d.large
+    - z1d.xlarge
+    - z1d.2xlarge
+    - z1d.3xlarge
+    - z1d.6xlarge
+    - z1d.12xlarge
+    - cg1.4xlarge
+    - u-6tb1.metal
+    - u-9tb1.metal
+    - u-12tb1.metal
+    - u-18tb1.metal
+    - u-24tb1.metal
+    - hi1.4xlarge
+
+    ConstraintDescription: Must be a valid EC2 instance type.
+  KeyName:
+    Description: Key pair used for the Trifacta and EMR instances
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  AllowedSSHSource:
+    Description: IP address range that can be used to SSH to the Trifacta instance
+      (in CIDR form)
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+  AllowedHTTPSource:
+    Description: IP address range that can be used to reach ports 3005, 80, and 443
+      (in CIDR form)
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+  MasterNodeType:
+    Description: Instance type for the EMR Core Nodes.
+    Type: String
+    Default: m5.2xlarge
+    AllowedValues:
+    - m4.xlarge
+    - m5.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - r4.xlarge
+    - r4.2xlarge
+    - r4.4xlarge
+    - r5.xlarge
+    - r5.2xlarge
+    - r5.4xlarge
+  MasterNodeVolSize:
+    Description: Size of the EBS volume attached to the Master node (GB)
+    Type: Number
+    Default: 200
+    MinValue: 100
+  CoreNodeType:
+    Description: Instance type for the EMR Core Nodes
+    Type: String
+    Default: m5.2xlarge
+    AllowedValues:
+    - m4.xlarge
+    - m5.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - r4.xlarge
+    - r4.2xlarge
+    - r4.4xlarge
+    - r5.xlarge
+    - r5.2xlarge
+    - r5.4xlarge
+  MinimumCoreNodes:
+    Description: Minimum number of Core nodes Autoscaling will keep
+    Type: Number
+    MinValue: 1
+    Default: 2
+    ConstraintDescription: There must be at least one Core node at all times.
+  MaximumCoreNodes:
+    Description: Maximum number of Core nodes Autoscaling will keep
+    Type: Number
+    Default: 4
+  CoreNodeVolSize:
+    Description: Size of the EBS volume attached to the Core nodes (GB)
+    Type: Number
+    Default: 100
+    MinValue: 100
+    ConstraintDescription: Core nodes need HDFS storage.
+  TaskNodeType:
+    Description: Instance type for the EMR Task nodes
+    Type: String
+    Default: m5.2xlarge
+    AllowedValues:
+    - m4.2xlarge
+    - m4.xlarge
+    - m5.xlarge
+    - m4.4xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - r4.xlarge
+    - r4.2xlarge
+    - r4.4xlarge
+    - r5.xlarge
+    - r5.2xlarge
+    - r5.4xlarge
+  MinimumTaskNodes:
+    Description: Minimum number of Task nodes Autoscaling will keep
+    Type: Number
+    Default: 0
+  MaximumTaskNodes:
+    Description: Maximum number of Task Nodes Autoscale will keep
+    Type: Number
+    Default: 4
+Mappings:
+  AWSRegionArch2AMI:
+    us-east-1:
+      HVM64: ami-0e215740267431073
+    us-east-2:
+      HVM64: ami-0317a628454e5eb6f
+    us-west-1:
+      HVM64: ami-09f8808c7f560c943
+    us-west-2:
+      HVM64: ami-0b9e17a7836212bc0
+    ca-central-1:
+      HVM64: ami-00f98064d3efdc2d9
+    eu-central-1:
+      HVM64: ami-0ff1c68f9016479ea
+    eu-west-1:
+      HVM64: ami-085a77b17fbdcb557
+    eu-west-2:
+      HVM64: ami-06a16d7cb70f6840d
+    eu-west-3:
+      HVM64: ami-0a96434c701a7b7ce
+    eu-north-1:
+      HVM64: ami-0563af9710ea044b1
+    ap-northeast-1:
+      HVM64: ami-0e0391377a2b07d47
+    ap-northeast-2:
+      HVM64: ami-0ef6a4dde96996324
+    ap-southeast-1:
+      HVM64: ami-06064114bf697e0ff
+    ap-southeast-2:
+      HVM64: ami-0ef8d287df43e74c6
+    ap-south-1:
+      HVM64: ami-0e88be4d7527ae922
+    sa-east-1:
+      HVM64: ami-03df1774cc9e63433
+    ap-east-1:
+      HVM64: ami-09270a4a320d76c52
+    me-south-1:
+      HVM64: ami-07749c113f8f0c33e
+    us-gov-east-1:
+      HVM64: ami-06906e85a8b5749ba
+    us-gov-west-1:
+      HVM64: ami-0df1611fddfe807e1
+    eu-south-1:
+      HVM64: ami-064647b2532de9049
+    af-south-1:
+      HVM64: ami-0477190101074cee5
+    ap-northeast-3:
+      HVM64: ami-08830d06c07863cd6
+Resources:
+  TrifactaBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+  TrifactaBucketAccess:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AllowBucketAccess
+      Roles:
+      - !Ref 'TrifactaNodeRole'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action:
+          - S3:DeleteObject
+          - S3:GetBucketLocation
+          - S3:GetObject
+          - S3:ListBucket
+          - S3:PutObject
+          Resource:
+          - !GetAtt [TrifactaBucket, Arn]
+          - !Join ['', [!GetAtt [TrifactaBucket, Arn], /*]]
+        - Effect: Allow
+          Action:
+          - S3:ListBucket
+          Resource: '*'
+        - Effect: Allow
+          Action:
+          - S3:GetObject
+          - S3:ListBucket
+          Resource:
+          - arn:aws:s3:::trifacta-public-datasets/*
+          - arn:aws:s3:::trifacta-public-datasets
+  TrifactaNodeInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref 'TrifactaNodeRole'
+  TrifactaNodeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: ''
+          Effect: Allow
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+  TrifactaInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VPCId'
+      GroupDescription: Allows web and SSH access to the Trifacta instance from the
+        CIDR ranges specified during stack creation.
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref 'AllowedSSHSource'
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: !Ref 'AllowedHTTPSource'
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: !Ref 'AllowedHTTPSource'
+      - IpProtocol: tcp
+        FromPort: 3005
+        ToPort: 3005
+        CidrIp: !Ref 'AllowedHTTPSource'
+  TrifactaInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      IamInstanceProfile: !Ref 'TrifactaNodeInstanceProfile'
+      ImageId: !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', HVM64]
+      InstanceType: !Ref 'TrifactaInstanceType'
+      KeyName: !Ref 'KeyName'
+      Tags:
+      - Key: Application
+        Value: Trifacta Wrangler Enterprise
+      - Key: Name
+        Value: Trifacta Wrangler
+      NetworkInterfaces:
+      - GroupSet:
+        - !GetAtt 'TrifactaInstanceSecurityGroup.GroupId'
+        AssociatePublicIpAddress: true
+        DeviceIndex: '0'
+        DeleteOnTermination: true
+        SubnetId: !Ref 'TrifactaSubnet'
+  TrifactaEMRSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VPCId'
+      GroupDescription: Allow access from the Trifacta instance to the EMR cluster
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 18080
+        ToPort: 18080
+        SourceSecurityGroupId: !GetAtt 'TrifactaInstanceSecurityGroup.GroupId'
+      - IpProtocol: tcp
+        FromPort: 8088
+        ToPort: 8088
+        SourceSecurityGroupId: !GetAtt 'TrifactaInstanceSecurityGroup.GroupId'
+  ElasticMapReduceMasterPrivate:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VPCId'
+      GroupDescription: EMR Master Node
+  ElasticMapReduceSlavePrivate:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VPCId'
+      GroupDescription: EMR Slave Nodes
+  ElasticMapReduceServiceAccess:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VPCId'
+      GroupDescription: EMR service access
+  TrifactaEMR:
+    Type: AWS::EMR::Cluster
+    Properties:
+      ReleaseLabel: emr-5.29.0
+      AutoScalingRole: !Ref 'TrifactaEmrAutoscalingRole'
+      Applications:
+      - Name: Hadoop
+      - Name: Spark
+      - Name: Ganglia
+      - Name: Hue
+      Configurations:
+      - Classification: capacity-scheduler
+        ConfigurationProperties:
+          yarn.scheduler.capacity.resource-calculator: org.apache.hadoop.yarn.util.resource.DominantResourceCalculator
+      - Classification: core-site
+        ConfigurationProperties:
+          hadoop.http.filter.initializers: org.apache.hadoop.security.HttpCrossOriginFilterInitializer,org.apache.hadoop.http.lib.StaticUserWebFilter
+      EbsRootVolumeSize: 50
+      Instances:
+        AdditionalMasterSecurityGroups:
+        - !GetAtt 'TrifactaEMRSecurityGroup.GroupId'
+        Ec2SubnetId: !Ref 'EMRSubnet'
+        EmrManagedMasterSecurityGroup: !Ref 'ElasticMapReduceMasterPrivate'
+        EmrManagedSlaveSecurityGroup: !Ref 'ElasticMapReduceSlavePrivate'
+        ServiceAccessSecurityGroup: !Ref 'ElasticMapReduceServiceAccess'
+        MasterInstanceGroup:
+          EbsConfiguration:
+            EbsBlockDeviceConfigs:
+            - VolumeSpecification:
+                SizeInGB: !Ref 'MasterNodeVolSize'
+                VolumeType: gp2
+              VolumesPerInstance: 1
+            EbsOptimized: true
+          InstanceCount: 1
+          InstanceType: !Ref 'MasterNodeType'
+          Market: ON_DEMAND
+          Name: Master
+        CoreInstanceGroup:
+          AutoScalingPolicy:
+            Constraints:
+              MaxCapacity: !Ref 'MaximumCoreNodes'
+              MinCapacity: !Ref 'MinimumCoreNodes'
+            Rules:
+            - Name: HDFSUtilization-scaleout
+              Description: HDFSUtilization-scaleout
+              Action:
+                SimpleScalingPolicyConfiguration:
+                  CoolDown: 300
+                  ScalingAdjustment: 1
+              Trigger:
+                CloudWatchAlarmDefinition:
+                  ComparisonOperator: GREATER_THAN_OR_EQUAL
+                  EvaluationPeriods: 1
+                  MetricName: HDFSUtilization
+                  Period: 300
+                  Threshold: 75
+            - Name: HDFSUtilization-scalein
+              Description: HDFSUtilization-scalein
+              Action:
+                SimpleScalingPolicyConfiguration:
+                  CoolDown: 300
+                  ScalingAdjustment: -1
+              Trigger:
+                CloudWatchAlarmDefinition:
+                  ComparisonOperator: LESS_THAN_OR_EQUAL
+                  EvaluationPeriods: 1
+                  MetricName: HDFSUtilization
+                  Period: 300
+                  Threshold: 20
+          EbsConfiguration:
+            EbsBlockDeviceConfigs:
+            - VolumeSpecification:
+                SizeInGB: !Ref 'CoreNodeVolSize'
+                VolumeType: gp2
+              VolumesPerInstance: 1
+            EbsOptimized: true
+          InstanceCount: 2
+          InstanceType: !Ref 'CoreNodeType'
+          Market: ON_DEMAND
+          Name: Core
+        TerminationProtected: false
+        Ec2KeyName: !Ref 'KeyName'
+      Name: Trifacta EMR Cluster
+      JobFlowRole: !Ref 'TrifactaEmrInstanceProfile'
+      ServiceRole: !Ref 'TrifactaEmrServiceRole'
+      Tags:
+      - Key: Name
+        Value: Trifacta Wrangler EMR
+      LogUri: !Join ['', ['s3://', !Ref 'TrifactaBucket', /EmrLogs/]]
+      VisibleToAllUsers: true
+  TrifactaEMRTaskGroup:
+    Type: AWS::EMR::InstanceGroupConfig
+    DeletionPolicy: Retain
+    Properties:
+      AutoScalingPolicy:
+        Constraints:
+          MaxCapacity: !Ref 'MaximumTaskNodes'
+          MinCapacity: !Ref 'MinimumTaskNodes'
+        Rules:
+        - Name: YARNMemoryAvailablePercentage-scaleout
+          Description: YARNMemoryAvailablePercentage-scaleout
+          Action:
+            SimpleScalingPolicyConfiguration:
+              CoolDown: 300
+              ScalingAdjustment: 1
+          Trigger:
+            CloudWatchAlarmDefinition:
+              ComparisonOperator: LESS_THAN_OR_EQUAL
+              EvaluationPeriods: 1
+              MetricName: YARNMemoryAvailablePercentage
+              Period: 300
+              Threshold: 25
+        - Name: ContainerPendingRatio-scaleout
+          Description: ContainerPendingRatio-scaleout
+          Action:
+            SimpleScalingPolicyConfiguration:
+              CoolDown: 300
+              ScalingAdjustment: 1
+          Trigger:
+            CloudWatchAlarmDefinition:
+              ComparisonOperator: GREATER_THAN_OR_EQUAL
+              EvaluationPeriods: 1
+              MetricName: ContainerPendingRatio
+              Period: 300
+              Threshold: 0.75
+        - Name: YARNMemoryAvailablePercentage-scalein
+          Description: YARNMemoryAvailablePercentage-scalein
+          Action:
+            SimpleScalingPolicyConfiguration:
+              CoolDown: 300
+              ScalingAdjustment: -1
+          Trigger:
+            CloudWatchAlarmDefinition:
+              ComparisonOperator: GREATER_THAN_OR_EQUAL
+              EvaluationPeriods: 1
+              MetricName: YARNMemoryAvailablePercentage
+              Period: 300
+              Threshold: 80
+      EbsConfiguration:
+        EbsBlockDeviceConfigs:
+        - VolumeSpecification:
+            SizeInGB: 50
+            VolumeType: gp2
+          VolumesPerInstance: 1
+        EbsOptimized: true
+      InstanceCount: !Ref 'MinimumTaskNodes'
+      InstanceType: !Ref 'TaskNodeType'
+      JobFlowId: !Ref 'TrifactaEMR'
+      InstanceRole: TASK
+  TrifactaEmrAutoscalingInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref 'TrifactaEmrAutoscalingRole'
+      InstanceProfileName: !Join [_, [!Ref 'AWS::StackName', !Ref 'AWS::Region', EmrAS]]
+  TrifactaEmrAutoscalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: ''
+          Effect: Allow
+          Principal:
+            Service: elasticmapreduce.amazonaws.com
+          Action: sts:AssumeRole
+        - Sid: ''
+          Effect: Allow
+          Principal:
+            Service: application-autoscaling.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+      - !If [IsGovCloud, 'arn:aws-us-gov:iam::aws:policy/service-role/AmazonElasticMapReduceforAutoScalingRole',
+        'arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforAutoScalingRole']
+      RoleName: !Join [_, [!Ref 'AWS::StackName', !Ref 'AWS::Region', EmrAS]]
+  TrifactaEmrEc2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: ''
+          Effect: Allow
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      RoleName: !Join [_, [!Ref 'AWS::StackName', !Ref 'AWS::Region', TrifactaEmrEc2Role]]
+  TrifactaEmrInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref 'TrifactaEmrEc2Role'
+      InstanceProfileName: !Join [_, [!Ref 'AWS::StackName', !Ref 'AWS::Region', TrifactaEmrEc2Role]]
+  TrifactaEmrEc2RolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: TrifactaEmrEc2Role
+      Roles:
+      - !Ref 'TrifactaEmrEc2Role'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action:
+          - elasticmapreduce:Describe*
+          - elasticmapreduce:List*
+          - s3:ListAllMyBuckets
+          - ec2:Describe*
+          Resource: '*'
+        - Effect: Allow
+          Action:
+          - s3:PutObject
+          - s3:ListBucket
+          - s3:GetObject
+          - s3:DeleteObject
+          Resource:
+          - !GetAtt [TrifactaBucket, Arn]
+          - !Join ['', [!GetAtt [TrifactaBucket, Arn], /*]]
+  TrifactaEmrServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: ''
+          Effect: Allow
+          Principal:
+            Service: elasticmapreduce.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+  TrifactaEmrServiceRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: TrifactaEmrServicePolicy
+      Roles:
+      - !Ref 'TrifactaEmrServiceRole'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action:
+          - s3:ListAllMyBuckets
+          Resource: '*'
+        - Effect: Allow
+          Action:
+          - s3:PutObject
+          - s3:GetObject
+          - s3:ListBucket
+          - s3:DeleteObject
+          Resource:
+          - !GetAtt [TrifactaBucket, Arn]
+          - !Join ['', [!GetAtt [TrifactaBucket, Arn], /*]]
+        - Effect: Allow
+          Action:
+          - ec2:AuthorizeSecurityGroupEgress
+          - ec2:AuthorizeSecurityGroupIngress
+          - ec2:CancelSpotInstanceRequests
+          - ec2:CreateNetworkInterface
+          - ec2:CreateSecurityGroup
+          - ec2:CreateTags
+          - ec2:DeleteNetworkInterface
+          - ec2:DeleteSecurityGroup
+          - ec2:DeleteTags
+          - ec2:DescribeAvailabilityZones
+          - ec2:DescribeAccountAttributes
+          - ec2:DescribeDhcpOptions
+          - ec2:DescribeImages
+          - ec2:DescribeInstanceStatus
+          - ec2:DescribeInstances
+          - ec2:DescribeKeyPairs
+          - ec2:DescribeNetworkAcls
+          - ec2:DescribeNetworkInterfaces
+          - ec2:DescribePrefixLists
+          - ec2:DescribeRouteTables
+          - ec2:DescribeSecurityGroups
+          - ec2:DescribeSpotInstanceRequests
+          - ec2:DescribeSpotPriceHistory
+          - ec2:DescribeSubnets
+          - ec2:DescribeTags
+          - ec2:DescribeVpcAttribute
+          - ec2:DescribeVpcEndpoints
+          - ec2:DescribeVpcEndpointServices
+          - ec2:DescribeVpcs
+          - ec2:DetachNetworkInterface
+          - ec2:ModifyImageAttribute
+          - ec2:ModifyInstanceAttribute
+          - ec2:RequestSpotInstances
+          - ec2:RevokeSecurityGroupEgress
+          - ec2:RunInstances
+          - ec2:TerminateInstances
+          - ec2:DeleteVolume
+          - ec2:DescribeVolumeStatus
+          - ec2:DescribeVolumes
+          - ec2:DetachVolume
+          - iam:GetRole
+          - iam:GetRolePolicy
+          - iam:ListInstanceProfiles
+          - iam:ListRolePolicies
+          - iam:PassRole
+          - sdb:BatchPutAttributes
+          - sdb:Select
+          - sqs:Delete*
+          - sqs:GetQueue*
+          - sqs:PurgeQueue
+          - sqs:ReceiveMessagev
+          - cloudwatch:PutMetricAlarm
+          - cloudwatch:DescribeAlarms
+          - cloudwatch:DeleteAlarms
+          - application-autoscaling:RegisterScalableTarget
+          - application-autoscaling:DeregisterScalableTarget
+          - application-autoscaling:PutScalingPolicy
+          - application-autoscaling:DeleteScalingPolicy
+          - application-autoscaling:Describe*
+          Resource: '*'
+  TrifactaNodeEmrAccess:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AllowEmrAccessFromTrifacta
+      Roles:
+      - !Ref 'TrifactaNodeRole'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action:
+          - elasticmapreduce:DescribeStep
+          - elasticmapreduce:ListBootstrapActions
+          - elasticmapreduce:ListClusters
+          - elasticmapreduce:DescribeCluster
+          - elasticmapreduce:AddJobFlowSteps
+          - elasticmapreduce:DescribeJobFlows
+          - elasticmapreduce:ListInstanceGroups
+          - elasticmapreduce:CancelSteps
+          Resource: '*'
+Outputs:
+  TrifactaUrl:
+    Description: The URL of the new Trifacta instance
+    Value: !Join ['', ['http://', !GetAtt [TrifactaInstance, PublicIp], ':3005']]
+  TrifactaInstanceId:
+    Description: This will be your default Trifacta password
+    Value: !Ref 'TrifactaInstance'
+  EmrClusterId:
+    Description: You will need this to configure Trifacta
+    Value: !Ref 'TrifactaEMR'
+  TrifactaBucket:
+    Description: This is the bucket where all your Trifacta data and EMR logs will
+      be stored
+    Value: !Ref 'TrifactaBucket'
