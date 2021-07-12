@@ -12,20 +12,26 @@ Metadata:
         Parameters:
         - KeyName
         - VPCId
-        - SubnetId
+        - TrifactaSubnet
+        - EMRSubnet  
     ParameterLabels:
       KeyName:
         default: Key pair
       VPCId:
         default: VPC
-      SubnetId:
-        default: Trifacta and EMR subnet
+      TrifactaSubnet:
+        default: Trifacta subnet
+      EMRSubnet:
+        default: EMR subnet
 Parameters:
   VPCId:
     Description: VPC to launch Trifacta and the EMR cluster into.
     Type: AWS::EC2::VPC::Id
-  SubnetId:
-    Description: Subnet to launch Trifacta and the EMR cluster into.
+  TrifactaSubnet:
+    Description: Subnet to launch Trifacta into.
+    Type: AWS::EC2::Subnet::Id
+  EMRSubnet:
+    Description: Subnet to launch the EMR cluster into.
     Type: AWS::EC2::Subnet::Id
   KeyName:
     Description: Key pair used for the Trifacta and EMR instances
@@ -172,7 +178,7 @@ Resources:
         AssociatePublicIpAddress: true
         DeviceIndex: '0'
         DeleteOnTermination: true
-        SubnetId: !Ref 'SubnetId'
+        SubnetId: !Ref 'TrifactaSubnet'
   TrifactaEMRSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -223,7 +229,7 @@ Resources:
       Instances:
         AdditionalMasterSecurityGroups:
         - !GetAtt 'TrifactaEMRSecurityGroup.GroupId'
-        Ec2SubnetId: !Ref 'SubnetId'
+        Ec2SubnetId: !Ref 'EMRSubnet'
         EmrManagedMasterSecurityGroup: !Ref 'ElasticMapReduceMasterPrivate'
         EmrManagedSlaveSecurityGroup: !Ref 'ElasticMapReduceSlavePrivate'
         ServiceAccessSecurityGroup: !Ref 'ElasticMapReduceServiceAccess'
