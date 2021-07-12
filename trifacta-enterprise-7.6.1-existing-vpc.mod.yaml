@@ -6,6 +6,13 @@ Description: This launches Wrangler Enterprise (BYOL) in an existing VPC along w
   a 4 node autoscaling EMR cluster.
 Metadata:
   AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: EC2 Configuration
+        Parameters:
+        - KeyName
+        - VPCId
+        - SubnetId
     ParameterLabels:
       KeyName:
         default: Key pair
