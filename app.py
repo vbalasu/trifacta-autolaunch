@@ -17,10 +17,12 @@ def trifacta_autolaunch(event, context):
     import boto3
     cf = boto3.client('cloudformation')
     describe_stacks = cf.describe_stacks(StackName=event['StackId'])
-    describe_stack_resources = cf.describe_stack_resources(StackName=event['StackId'])
+    resources = cf.describe_stack_resources(StackName=event['StackId'])
+    bucket_name = [resource['PhysicalResourceId'] for resource in resources['StackResources'] if resource['LogicalResourceId'] == 'TrifactaBucket'][0]
     print('event', json.dumps(event, default=str))
     print('describe_stacks', json.dumps(describe_stacks, default=str))
-    print('describe_stack_resources', json.dumps(describe_stack_resources, default=str))
+    print('resources', json.dumps(resources, default=str))
+    print('bucket_name', bucket_name)
     helper(event, context)
     return helper.Data
 # END Cloudformation Custom Resource (crhelper)
