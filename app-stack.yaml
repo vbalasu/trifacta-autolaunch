@@ -17,13 +17,10 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: 91d187a3-61ff-430c-a09f-e5c747eb8f99
-  SumResource:
-    Type: 'Custom::Summer'
+  TrifactaAutolaunch:
+    Type: 'Custom::TrifactaAutolaunch'
     Properties:
-      ServiceToken:
-        Fn::GetAtt:
-          - AddNumbers
-          - Arn
+      ServiceToken: !GetAtt 'TrifactaAutolaunchLambda.Arn'
       No1: 2
       No2: 3
 Outputs:
@@ -32,4 +29,4 @@ Outputs:
   StackName:
     Value: !Sub '${AWS::StackName}'
   Sum:
-    Value: !GetAtt SumResource.Sum
+    Value: !GetAtt TrifactaAutolaunch.No1

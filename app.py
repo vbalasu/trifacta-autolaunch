@@ -6,14 +6,17 @@ from crhelper import CfnResource
 helper = CfnResource()
 @helper.create
 @helper.update
-def sum_2_numbers(event, _):
-    s = int(event['ResourceProperties']['No1']) + int(event['ResourceProperties']['No2'])
-    helper.Data['Sum'] = s
+def do_autolaunch(event, context):
+    helper.Data['No1'] = event['ResourceProperties']['No1']
 @helper.delete
 def no_op(_, __):
     pass
-@app.lambda_function(name='AddNumbers')
-def add_numbers(event, context):
+@app.lambda_function(name='TrifactaAutolaunchLambda')
+def trifacta_autolaunch(event, context):
+    import boto3
+    cf = boto3.client('cloudformation')
+    describe_stacks = cf.describe_stacks(StackName=event['StackId'])
+    print({'event': event, 'describe_stacks': describe_stacks})
     helper(event, context)
     return helper.Data
 # END Cloudformation Custom Resource (crhelper)
