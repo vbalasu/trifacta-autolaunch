@@ -28,12 +28,5 @@ Outputs:
     Value: !Sub '${TrifactaBucket}'
   StackName:
     Value: !Sub '${AWS::StackName}'
-<<<<<<< HEAD
-  Event:
-    Value: !GetAtt TrifactaAutolaunch.event
-  Context:
-    Value: !GetAtt TrifactaAutolaunch.context
-=======
   Sum:
     Value: !GetAtt TrifactaAutolaunch.No1
->>>>>>> tmp

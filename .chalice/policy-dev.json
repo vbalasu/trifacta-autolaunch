@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Action": [
+              "cloudformation:DescribeStacks",
+              "cloudformation:DescribeStackResources"
+          ],
+          "Resource": [
+              "*"
+          ],
+          "Effect": "Allow",
+          "Sid": "4301662f07b4449ebfcd20861f0c02b3"
+      },
+      {
+          "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+          ],
+          "Resource": "arn:*:logs:*:*:*",
+          "Effect": "Allow"
+      }
+  ]
+}
