@@ -8,7 +8,7 @@ helper = CfnResource()
 @helper.create
 @helper.update
 def do_autolaunch(event, context):
-    helper.Data['No1'] = event['ResourceProperties']['No1']
+    helper.Data['Message'] = 'Autolaunch Complete'
 @helper.delete
 def no_op(_, __):
     pass
