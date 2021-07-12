@@ -3,17 +3,20 @@ app = Chalice(app_name='trifacta-autolaunch')
 
 # BEGIN Cloudformation Custom Resource (crhelper)
 from crhelper import CfnResource
+import json
 helper = CfnResource()
 @helper.create
 @helper.update
-def sum_2_numbers(event, _):
-    s = int(event['ResourceProperties']['No1']) + int(event['ResourceProperties']['No2'])
-    helper.Data['Sum'] = s
+def do_trifacta_autolaunch(event, context):
+    print('event', event)
+    print('context', context)
+    helper.Data['event'] = json.dumps(event)
+    helper.Data['context'] = json.dumps(context)
 @helper.delete
 def no_op(_, __):
     pass
-@app.lambda_function(name='AddNumbers')
-def add_numbers(event, context):
+@app.lambda_function(name='TrifactaAutolaunch')
+def trifacta_autolaunch(event, context):
     helper(event, context)
     return helper.Data
 # END Cloudformation Custom Resource (crhelper)
