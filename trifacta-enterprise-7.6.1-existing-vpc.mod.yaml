@@ -28,10 +28,10 @@ Parameters:
     Description: VPC to launch Trifacta and the EMR cluster into.
     Type: AWS::EC2::VPC::Id
   TrifactaSubnet:
-    Description: Subnet to launch Trifacta into.
+    Description: Subnet to launch Trifacta into. This is usually a public subnet.
     Type: AWS::EC2::Subnet::Id
   EMRSubnet:
-    Description: Subnet to launch the EMR cluster into.
+    Description: Subnet to launch the EMR cluster into. This is usually a private subnet.
     Type: AWS::EC2::Subnet::Id
   KeyName:
     Description: Key pair used for the Trifacta and EMR instances
