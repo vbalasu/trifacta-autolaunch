@@ -5,3 +5,5 @@ out/
 trifacta-packaged.yaml
 .chalice/deployed/dev.json
 sum.zip
+stack.json
+stack-resources.json
