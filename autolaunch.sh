@@ -8,3 +8,5 @@ export EMR_CLUSTER_ID=$(cat stack.json |jq '.Stacks[].Outputs[] | select(.Output
 export TRIFACTA_PUBLIC_DNS_NAME=$(aws ec2 describe-instances --instance-ids $TRIFACTA_INSTANCE_ID |jq '.Reservations[].Instances[].PublicDnsName' -r)
 export PATH_TO_KEY="/Users/vbalasubramaniam/Desktop/amazon/vbalasubramaniam-keypair-2.pem"
 ssh -i $PATH_TO_KEY centos@$TRIFACTA_PUBLIC_DNS_NAME "hostname"
+curl -X POST -H "Content-Type: application/json" -d '{"lifetimeSeconds":86400, "description":"Autolaunch 1 day token"}' -u admin@trifacta.local:$TRIFACTA_INSTANCE_ID $TRIFACTA_URL/v4/apiAccessTokens >token.json
+
