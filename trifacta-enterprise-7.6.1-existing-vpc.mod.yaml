@@ -94,6 +94,21 @@ Resources:
   TrifactaBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
+  TrifactaNodeIntrospectionAccess:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: TrifactaNodeIntrospectionAccess
+      Roles:
+        - !Ref 'TrifactaNodeRole'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - cloudformation:DescribeStackResources
+              - cloudformation:DescribeStacks
+            Resource: '*'
   TrifactaBucketAccess:
     Type: AWS::IAM::Policy
     Properties:
