@@ -12,6 +12,7 @@ with open(path_to_triconf) as f:
 import os
 os.getenv('TRIFACTA_BUCKET')
 config['aws']['s3']['bucket']['name'] = os.getenv('TRIFACTA_BUCKET')
+config['webapp']['runInEMR'] = True
 with open(path_to_triconf, 'w') as f:
     json.dump(config, f, indent=2)
     
