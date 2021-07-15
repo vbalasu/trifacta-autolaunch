@@ -10,3 +10,6 @@ export PATH_TO_KEY="/Users/vbalasubramaniam/Desktop/amazon/vbalasubramaniam-keyp
 ssh -i $PATH_TO_KEY centos@$TRIFACTA_PUBLIC_DNS_NAME "hostname"
 curl -X POST -H "Content-Type: application/json" -d '{"lifetimeSeconds":86400, "description":"Autolaunch 1 day token"}' -u admin@trifacta.local:$TRIFACTA_INSTANCE_ID $TRIFACTA_URL/v4/apiAccessTokens >token.json
 export TRIFACTA_TOKEN=$(cat token.json | jq '.tokenValue' -r)
+
+# Set aws.s3.enabled to true using configuration service
+ssh -i $PATH_TO_KEY centos@$TRIFACUBLIC_DNS_NAME "curl -s -X PUT -H 'Content-Type: application/json' --data 'true' localhost:10075/v1/setting/aws.s3.enabled/system/1"
