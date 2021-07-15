@@ -18,3 +18,7 @@ ssh -i $PATH_TO_KEY centos@$TRIFACUBLIC_DNS_NAME "curl -s -X PUT -H 'Content-Typ
 scp -i $PATH_TO_KEY update_triconf.py centos@$TRIFACTA_PUBLIC_DNS_NAME:update_triconf.py
 scp -i $PATH_TO_KEY stack.json centos@$TRIFACTA_PUBLIC_DNS_NAME:stack.json
 ssh -i $PATH_TO_KEY centos@$TRIFACTA_PUBLIC_DNS_NAME "sudo python3 update_triconf.py"
+ssh -i $PATH_TO_KEY centos@$TRIFACTA_PUBLIC_DNS_NAME "sudo service trifacta restart"
+
+# Configure EMR
+curl -X POST -H "Content-Type: application/json" -d "{\"emrClusterId\": \"$EMR_CLUSTER_ID\", \"resourceBucket\": \"$TRIFACTA_BUCKET\", \"resourcePath\": \"resources\"}" -H "Authorization: Bearer $TRIFACTA_TOKEN" $TRIFACTA_URL/v4/emrClusters
