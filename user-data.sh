@@ -1,7 +1,6 @@
 # BEGIN Cloudformation template UserData section
 #            #!/bin/bash -xe
 #            exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-#            yum update -y
 #            yum install -y git jq
 #            cd /root
 #            git clone https://github.com/vbalasu/trifacta-autolaunch.git
