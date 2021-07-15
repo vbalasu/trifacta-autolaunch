@@ -86,11 +86,6 @@ Mappings:
     ap-northeast-3:
       HVM64: ami-08830d06c07863cd6
 Resources:
-  TrifactaAutolaunch:
-    Type: 'Custom::TrifactaAutolaunch'
-    DependsOn: TrifactaEMRTaskGroup
-    Properties:
-      ServiceToken: !GetAtt 'TrifactaAutolaunchLambda.Arn'
   TrifactaBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
