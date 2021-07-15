@@ -1,9 +1,9 @@
 # Trifacta autolaunch script
 export PATH_TO_KEY="/Users/vbalasubramaniam/Desktop/amazon/vbalasubramaniam-keypair-2.pem"
+export STACK_NAME="trifacta-fullstack6"
 
-
-aws cloudformation describe-stacks --stack-name trifacta-fullstack5 >stack.json
-aws cloudformation describe-stack-resources --stack-name trifacta-fullstack5 >stack-resources.json
+aws cloudformation describe-stacks --stack-name $STACK_NAME >stack.json
+aws cloudformation describe-stack-resources --stack-name $STACK_NAME >stack-resources.json
 export TRIFACTA_URL=$(cat stack.json |jq '.Stacks[].Outputs[] | select(.OutputKey == "TrifactaUrl").OutputValue' -r)
 export TRIFACTA_INSTANCE_ID=$(cat stack.json |jq '.Stacks[].Outputs[] | select(.OutputKey == "TrifactaInstanceId").OutputValue' -r)
 export TRIFACTA_BUCKET=$(cat stack.json |jq '.Stacks[].Outputs[] | select(.OutputKey == "TrifactaBucket").OutputValue' -r)
