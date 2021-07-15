@@ -1,5 +1,5 @@
 # coding: utf-8
-path_to_triconf = 'trifacta-conf.json'
+path_to_triconf = '/opt/trifacta/conf/trifacta-conf.json'
 
 import shutil, datetime
 timestamp = datetime.datetime.now().isoformat().replace(':', '_')
@@ -9,9 +9,11 @@ import json
 with open(path_to_triconf) as f:
     config = json.load(f)
     
-import os
-os.getenv('TRIFACTA_BUCKET')
-config['aws']['s3']['bucket']['name'] = os.getenv('TRIFACTA_BUCKET')
+with open('stack.json') as f:
+    stack = json.load(f)
+
+trifacta_bucket = [o['OutputValue'] for o in stack['Stacks'][0]['Outputs'] if o['OutputKey'] == 'TrifactaBucket'][0]
+config['aws']['s3']['bucket']['name'] = trifacta_bucket
 config['webapp']['runInEMR'] = True
 with open(path_to_triconf, 'w') as f:
     json.dump(config, f, indent=2)

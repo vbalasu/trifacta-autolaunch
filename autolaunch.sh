@@ -13,3 +13,8 @@ export TRIFACTA_TOKEN=$(cat token.json | jq '.tokenValue' -r)
 
 # Set aws.s3.enabled to true using configuration service
 ssh -i $PATH_TO_KEY centos@$TRIFACUBLIC_DNS_NAME "curl -s -X PUT -H 'Content-Type: application/json' --data 'true' localhost:10075/v1/setting/aws.s3.enabled/system/1"
+
+# Copy update_triconf.py to server and execute it
+scp -i $PATH_TO_KEY update_triconf.py centos@$TRIFACTA_PUBLIC_DNS_NAME:update_triconf.py
+scp -i $PATH_TO_KEY stack.json centos@$TRIFACTA_PUBLIC_DNS_NAME:stack.json
+ssh -i $PATH_TO_KEY centos@$TRIFACTA_PUBLIC_DNS_NAME "sudo python3 update_triconf.py"
