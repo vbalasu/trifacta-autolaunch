@@ -4,7 +4,7 @@
 #            yum install -y git jq
 #            cd /root
 #            git clone https://github.com/vbalasu/trifacta-autolaunch.git
-#            trifacta-autolaunch/user-data.sh
+#            /bin/bash -xe trifacta-autolaunch/user-data.sh
 # END Cloudformation template UserData section
 cd /root
 export TRIFACTA_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
@@ -16,12 +16,12 @@ export TRIFACTA_URL=$(cat stack.json |jq '.Stacks[].Outputs[] | select(.OutputKe
 export TRIFACTA_BUCKET=$(cat stack.json |jq '.Stacks[].Outputs[] | select(.OutputKey == "TrifactaBucket").OutputValue' -r)
 export EMR_CLUSTER_ID=$(cat stack.json |jq '.Stacks[].Outputs[] | select(.OutputKey == "EmrClusterId").OutputValue' -r)
 
-# Set aws.s3.enabled to true using configuration service
-curl -s -X PUT -H 'Content-Type: application/json' --data 'true' localhost:10075/v1/setting/aws.s3.enabled/system/1
-
 # Update triconf
 python3 trifacta-autolaunch/update_triconf.py
 service trifacta restart
+
+# Set aws.s3.enabled to true using configuration service
+curl -s -X PUT -H 'Content-Type: application/json' --data 'true' localhost:10075/v1/setting/aws.s3.enabled/system/1
 
 # Obtain token
 curl -s -X POST -H "Content-Type: application/json" -d '{"lifetimeSeconds":86400, "description":"Autolaunch 1 day token"}' -u admin@trifacta.local:$TRIFACTA_INSTANCE_ID $TRIFACTA_URL/v4/apiAccessTokens >token.json

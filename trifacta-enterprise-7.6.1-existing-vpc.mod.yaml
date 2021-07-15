@@ -203,7 +203,7 @@ Resources:
             yum install -y git jq
             cd /root
             git clone https://github.com/vbalasu/trifacta-autolaunch.git
-            trifacta-autolaunch/user-data.sh
+            /bin/bash -xe trifacta-autolaunch/user-data.sh
   TrifactaEMRSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
