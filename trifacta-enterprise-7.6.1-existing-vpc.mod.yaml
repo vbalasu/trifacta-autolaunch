@@ -177,7 +177,7 @@ Resources:
         CidrIp: '0.0.0.0/0'
   TrifactaInstance:
     Type: AWS::EC2::Instance
-    DependsOn: !Ref 'TrifactaEMRTaskGroup'
+    DependsOn: TrifactaEMRTaskGroup
     Properties:
       IamInstanceProfile: !Ref 'TrifactaNodeInstanceProfile'
       ImageId: !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', HVM64]
