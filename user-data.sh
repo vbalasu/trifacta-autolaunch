@@ -1,9 +1,11 @@
 # BEGIN Cloudformation template UserData section
 #yum update -y
 #yum install git jq -y
+#cd /root
 #git clone https://github.com/vbalasu/trifacta-autolaunch.git
 #trifacta-autolaunch/user-data.sh
 # END Cloudformation template UserData section
+cd /root
 export TRIFACTA_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 export AWS_REGION=$(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
 export STACK_NAME=$(aws ec2 describe-instances --instance-ids $TRIFACTA_INSTANCE_ID --region $AWS_REGION |jq '.Reservations[].Instances[].Tags[] |select(.Key == "aws:cloudformation:stack-name").Value' -r)

@@ -177,6 +177,7 @@ Resources:
         CidrIp: '0.0.0.0/0'
   TrifactaInstance:
     Type: AWS::EC2::Instance
+    DependsOn: !Ref 'TrifactaEMRTaskGroup'
     Properties:
       IamInstanceProfile: !Ref 'TrifactaNodeInstanceProfile'
       ImageId: !FindInMap [AWSRegionArch2AMI, !Ref 'AWS::Region', HVM64]
@@ -200,6 +201,7 @@ Resources:
             #!/bin/bash
             yum update -y
             yum install -y git jq
+            cd /root
             git clone https://github.com/vbalasu/trifacta-autolaunch.git
             trifacta-autolaunch/user-data.sh
   TrifactaEMRSecurityGroup:
