@@ -4,7 +4,7 @@
 #            yum install -y git jq
 #            cd /root
 #            git clone https://github.com/vbalasu/trifacta-autolaunch.git
-#            /bin/bash -xe trifacta-autolaunch/user-data.sh
+#            /bin/bash -x trifacta-autolaunch/user-data.sh
 # END Cloudformation template UserData section
 cd /root
 export TRIFACTA_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
